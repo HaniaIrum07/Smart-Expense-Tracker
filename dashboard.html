@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Expense Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #003B5B;
+      color: white;
+      padding: 20px;
+    }
+    .sidebar h2 {
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 10px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .sidebar ul li:hover {
+      background-color: #00547C;
+    }
+    .sidebar ul li i {
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+      background-color: #f4f4f4;
+      position: relative;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .dashboard-header {
+      margin-bottom: 20px;
+    }
+    .greeting {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .datetime {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .info-row {
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .info-label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .edit-link {
+      color: #003B5B;
+      cursor: pointer;
+      font-weight: normal;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .action-buttons button {
+      padding: 10px 15px;
+      background-color: #003B5B;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .action-buttons button i {
+      font-size: 14px;
+    }
+    .action-buttons button:hover {
+      background-color: #00547C;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    .action-content {
+      display: none;
+      margin-top: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .submit-btn {
+      background-color: #003B5B;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .input-with-button {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      align-items: center;
+    }
+    .input-with-button input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 40px;
+      box-sizing: border-box;
+    }
+    .input-with-button button {
+      padding: 10px 15px;
+      height: 40px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .close {
+      color: #aaa;
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: #000;
+    }
+    .modal-btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #003B5B;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .confirm-box {
+      background: #fff8e1;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      border-left: 4px solid #ffc107;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .data-table th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+    .data-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    .save-to-dashboard {
+      text-align: right;
+      margin-top: 20px;
+    }
+    .sent {
+      color: #e53935;
+    }
+    .received {
+      color: #43a047;
+    }
+    
+    /* Analysis Section Styles */
+    .analysis-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .analysis-card {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .pie-chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    
+    .pie-chart {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 20px;
+    }
+    
+    .pie-chart-bg {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+    }
+    
+    .chart-legend {
+      display: flex;
+      gap: 30px;
+      text-align: center;
+    }
+    
+    .legend-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    
+    .legend-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+    
+    .legend-value {
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    
+    .bar-chart-container {
+      margin-top: 20px;
+      position: relative;
+    }
+    
+    .chart-area {
+      display: flex;
+      height: 250px;
+    }
+    
+    .y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-right: 15px;
+      font-size: 12px;
+      color: #666;
+      height: 200px;
+      width: 60px;
+    }
+    
+    .y-axis div {
+      text-align: right;
+      padding-right: 10px;
+    }
+    
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 40px;
+      height: 200px;
+      width: calc(100% - 60px);
+      border-left: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .zero-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: #ccc;
+    }
+    
+    .bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    
+    .bar {
+      width: 40px;
+      border-radius: 4px 4px 0 0;
+    }
+    
+    .received-bar {
+      background: #4CAF50;
+    }
+    
+    .sent-bar {
+      background: #FFC107;
+    }
+    
+    .chart-label {
+      font-size: 14px;
+      color: #555;
+      position: absolute;
+      bottom: -25px;
+      white-space: nowrap;
+    }
+    
+    .x-axis-label {
+      text-align: center;
+      margin-top: 30px;
+      width: 100%;
+      position: relative;
+      bottom: auto;
+    }
+    
+    .y-axis-label {
+      position: absolute;
+      top: 50%;
+      left: -50px;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      font-size: 12px;
+      color: #666;
+      width: 100px;
+      text-align: center;
+    }
+    
+    /* Predict Saving Section Styles */
+    .predict-saving-container {
+      margin-top: 20px;
+    }
+    
+    .expense-inputs {
+      margin-top: 15px;
+    }
+    
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .category-name {
+      width: 120px;
+      color: #555;
+    }
+    
+    .colon {
+      width: 10px;
+      text-align: center;
+    }
+    
+    .result-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      border-left: 4px solid #2196F3;
+    }
+    
+    .result-label {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    
+    .result-value {
+      font-weight: bold;
+      font-size: 20px;
+      color: #2196F3;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2><i class="fas fa-wallet"></i> Smart Expense Tracker</h2>
+    <ul>
+      <li onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</li>
+      <li onclick="showSection('records')"><i class="fas fa-file-alt"></i> Records</li>
+      <li onclick="showSection('transactions')"><i class="fas fa-exchange-alt"></i> Transactions</li>
+      <li onclick="showSection('analysis')"><i class="fas fa-chart-line"></i> Analysis</li>
+      <li onclick="showSection('predict-saving')"><i class="fas fa-lightbulb"></i> Predict Savings</li>
+      <li onclick="logout()" style="margin-top: 50px; color: #ff6b6b;"><i class="fas fa-sign-out-alt"></i> Logout</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <!-- Dashboard Header -->
+    <div id="dashboard-header" class="dashboard-header">
+      <div class="greeting">Welcome, <span id="username-display">user123</span></div>
+      <div class="datetime">Date: <span id="date"></span> | Time: <span id="time"></span></div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard" class="section active">
+      <div class="card">
+        <h1>Dashboard</h1>
+      </div>
+      <div class="card">
+        <h3>User Information</h3>
+        <div class="info-row"><div><span class="info-label">User ID:</span> <span id="user-id">user123</span></div> <span class="edit-link" onclick="openModal('userid')"><i class="fas fa-edit"></i> Edit</span></div>
+        <div class="info-row"><div><span class="info-label">Email:</span> <span id="user-email">user@example.com</span></div> <span class="edit-link" onclick="openModal('email')"><i class="fas fa-edit"></i> Edit</span></div>
+        <div class="info-row"><div><span class="info-label">Password:</span> ••••••••</div> <span class="edit-link" onclick="openModal('password')"><i class="fas fa-edit"></i> Edit</span></div>
+        <div class="info-row"><div><span class="info-label">Income:</span> PKR <span id="user-income">0</span></div> <span class="edit-link" onclick="openModal('income')"><i class="fas fa-edit"></i> Edit</span></div>
+      </div>
+    </div>
+
+    <!-- Records Section -->
+    <div id="records" class="section">
+      <div class="card">
+        <h1>Records</h1>
+        <div class="action-buttons">
+          <button onclick="showAction('records', 'add-expense')"><i class="fas fa-plus"></i> Add Expense</button>
+          <button onclick="showAction('records', 'view-expense')"><i class="fas fa-eye"></i> View Expenses</button>
+          <button onclick="showAction('records', 'edit-expense')"><i class="fas fa-edit"></i> Edit Expense</button>
+          <button onclick="showAction('records', 'delete-expense')"><i class="fas fa-trash"></i> Delete Expense</button>
+        </div>
+
+        <!-- All record actions are initially hidden -->
+        <div id="add-expense" class="action-content"></div>
+        <div id="view-expense" class="action-content"></div>
+        <div id="edit-expense" class="action-content"></div>
+        <div id="delete-expense" class="action-content"></div>
+        
+        <!-- Save button to return to Dashboard -->
+        <div class="save-to-dashboard">
+          <button class="submit-btn" onclick="showSection('dashboard')"><i class="fas fa-save"></i> Save & Return to Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Section -->
+    <div id="transactions" class="section">
+      <div class="card">
+        <h1><i class="fas fa-exchange-alt"></i> Transactions</h1>
+        <div class="action-buttons">
+          <button onclick="showAction('transactions', 'add-transaction')"><i class="fas fa-plus"></i> Add Transaction</button>
+          <button onclick="showAction('transactions', 'view-transactions')"><i class="fas fa-eye"></i> View Transactions</button>
+        </div>
+
+        <!-- Transaction actions -->
+        <div id="add-transaction" class="action-content">
+          <form id="addTransactionForm">
+            <div class="form-group">
+              <label for="transaction-type"><i class="fas fa-exchange-alt"></i> Transaction Type:</label>
+              <select id="transaction-type" required>
+                <option value="">Select Type</option>
+                <option value="sent">Sent</option>
+                <option value="received">Received</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="transaction-amount"><i class="fas fa-money-bill-wave"></i> Amount:</label>
+              <input type="number" id="transaction-amount" min="0" step="1" required>
+            </div>
+            <div class="form-group">
+              <label for="transaction-date"><i class="fas fa-calendar"></i> Date:</label>
+              <input type="date" id="transaction-date" required>
+            </div>
+            <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Add Transaction</button>
+          </form>
+        </div>
+
+        <div id="view-transactions" class="action-content">
+          <table class="data-table">
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+            <!-- Transactions will be dynamically added here -->
+          </table>
+        </div>
+        
+        <!-- Save button to return to Dashboard -->
+        <div class="save-to-dashboard">
+          <button class="submit-btn" onclick="showSection('dashboard')"><i class="fas fa-save"></i> Save & Return to Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Section -->
+    <div id="analysis" class="section">
+      <div class="card">
+        <h1><i class="fas fa-chart-line"></i> Analysis</h1>
+        
+        <div class="analysis-container">
+          
+          <!-- Expense Distribution Card -->
+          <div class="card analysis-card">
+            <h3>Expense Distribution by Category (This Month)</h3>
+            <div class="pie-chart-container">
+              <div class="pie-chart">
+                <div class="pie-chart-bg" id="pie-chart"></div>
+              </div>
+              <div class="chart-legend" id="pie-legend">
+                <!-- Legend will be dynamically added here -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Transaction Summary Card -->
+          <div class="card analysis-card">
+            <h3>Transaction Summary (This Month)</h3>
+            <div class="bar-chart-container">
+              <div class="chart-area">
+                <!-- Y-axis with markings -->
+                <div class="y-axis" id="y-axis">
+                  <!-- Y-axis labels will be dynamically added here -->
+                </div>
+
+                <!-- Bar chart area -->
+                <div class="bar-chart" id="bar-chart">
+                  <!-- Bars will be dynamically added here -->
+                </div>
+              </div>
+
+              <!-- Transaction Type label -->
+              <div class="x-axis-label">Transaction Type</div>
+
+              <!-- Y-axis label with proper formatting -->
+              <div class="y-axis-label">Amount (PKR)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predict Savings Section -->
+    <div id="predict-saving" class="section">
+      <div class="card">
+        <h1><i class="fas fa-lightbulb"></i> Predict Savings</h1>
+        <div class="description">Enter your estimated monthly expenses in the categories below:</div>
+        
+        <div class="expense-inputs">
+          <div class="input-row">
+            <div class="category-name">Food</div>
+            <div class="colon">:</div>
+            <input type="number" id="food-expense" placeholder="Amount" >
+          </div>
+          
+          <div class="input-row">
+            <div class="category-name">Transport</div>
+            <div class="colon">:</div>
+            <input type="number" id="transport-expense" placeholder="Amount" >
+          </div>
+          
+          <div class="input-row">
+            <div class="category-name">Entertainment</div>
+            <div class="colon">:</div>
+            <input type="number" id="entertainment-expense" placeholder="Amount" >
+          </div>
+          
+          <div class="input-row">
+            <div class="category-name">Housing</div>
+            <div class="colon">:</div>
+            <input type="number" id="housing-expense" placeholder="Amount" >
+          </div>
+          
+          <div class="input-row">
+            <div class="category-name">Other</div>
+            <div class="colon">:</div>
+            <input type="number" id="other-expense" placeholder="Amount" >
+          </div>
+        </div>
+        
+        
+<button class="submit-btn" onclick="calculateSavings()"><i class="fas fa-calculator"></i> Predict Savings</button>
+
+<div class="result-box" style="display:none;">
+          <div class="result-label">Estimated Savings</div>
+          <div class="result-value" id="estimated-savings">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals for User Information Editing -->
+    <div id="modal-userid" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('userid')">&times;</span>
+        <h3><i class="fas fa-user-edit"></i> Edit User ID</h3>
+        <div class="form-group">
+          <label>Current User ID</label>
+          <input type="text" id="current-userid" disabled>
+        </div>
+        <div class="form-group">
+          <label>New User ID</label>
+          <input type="text" id="new-userid">
+        </div>
+        <button class="modal-btn" onclick="updateUserID()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+    
+    <div id="modal-email" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('email')">&times;</span>
+        <h3><i class="fas fa-envelope"></i> Edit Email</h3>
+        <div class="form-group">
+          <label>Current Email</label>
+          <input type="text" id="current-email" disabled>
+        </div>
+        <div class="form-group">
+          <label>New Email</label>
+          <input type="email" id="new-email">
+        </div>
+        <button class="modal-btn" onclick="updateEmail()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+    
+    <div id="modal-password" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('password')">&times;</span>
+        <h3><i class="fas fa-lock"></i> Edit Password</h3>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirm-password">
+        </div>
+        <button class="modal-btn" onclick="updatePassword()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+    
+    <div id="modal-income" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('income')">&times;</span>
+        <h3><i class="fas fa-money-bill-wave"></i> Edit Income</h3>
+        <div class="form-group">
+          <label>Current Income</label>
+          <input type="text" id="current-income" disabled>
+        </div>
+        <div class="form-group">
+          <label>New Income</label>
+          <input type="number" id="new-income">
+        </div>
+        <button class="modal-btn" onclick="updateIncome()"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Font Awesome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+  <script>
+    // Get user data from URL or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user');
+    
+    let currentUser = userParam ? JSON.parse(decodeURIComponent(userParam)) : 
+                   JSON.parse(localStorage.getItem('currentUser')) || {
+                     id: "user123",
+                     email: "user@example.com",
+                     password: "securepassword",
+                     income: 0,
+                     expenses: [],
+                     transactions: []
+                   };
+
+    // Color palette for charts
+    const categoryColors = {
+      food: '#4CAF50',
+      transport: '#2196F3',
+      housing: '#FF9800',
+      entertainment: '#9C27B0',
+      other: '#607D8B'
+    };
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Save user data to localStorage if it came from URL
+      if (userParam) {
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+      
+      showSection('dashboard');
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      loadUserData();
+      
+      // Set up form event listeners
+      setupFormListeners();
+    });
+
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('date').textContent = now.toLocaleDateString();
+      document.getElementById('time').textContent = now.toLocaleTimeString();
+    }
+
+    function loadUserData() {
+      // Update UI with user data
+      document.getElementById('username-display').textContent = currentUser.id;
+      document.getElementById('user-id').textContent = currentUser.id;
+      document.getElementById('current-userid').value = currentUser.id;
+      document.getElementById('user-email').textContent = currentUser.email;
+      document.getElementById('current-email').value = currentUser.email;
+      document.getElementById('user-income').textContent = currentUser.income.toLocaleString('en-PK');
+      document.getElementById('current-income').value = currentUser.income.toLocaleString('en-PK');
+      
+      // Update transactions table
+      updateTransactionsTable();
+      
+      // Update charts
+      updateCharts();
+    }
+
+    function saveUserData() {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      // Also update the users array in localStorage if this is a registered user
+      const users = JSON.parse(localStorage.getItem('expenseTrackerUsers')) || [];
+      const userIndex = users.findIndex(u => u.id === currentUser.id);
+      if (userIndex !== -1) {
+        users[userIndex] = {
+          id: currentUser.id,
+          email: currentUser.email,
+          password: currentUser.password,
+          income: currentUser.income,
+          expenses: currentUser.expenses,
+          transactions: currentUser.transactions
+        };
+        localStorage.setItem('expenseTrackerUsers', JSON.stringify(users));
+      }
+    }
+
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+      
+      // Show/hide dashboard header
+      document.getElementById('dashboard-header').style.display = 
+        sectionId === 'dashboard' ? 'block' : 'none';
+      
+      // Clear all action contents when switching sections
+      document.querySelectorAll('.action-content').forEach(a => {
+        a.innerHTML = '';
+        a.style.display = 'none';
+      });
+      
+      // Initialize predict savings section when shown
+      if (sectionId === 'predict-saving') {
+        predictSavings();
+      }
+      
+      // Update charts when analysis section is shown
+      if (sectionId === 'analysis') {
+        updateCharts();
+      }
+    }
+
+    function showAction(section, actionId) {
+      // Hide all actions in current section
+      const sectionElement = document.getElementById(section);
+      sectionElement.querySelectorAll('.action-content').forEach(a => {
+        a.style.display = 'none';
+      });
+      
+      // Show selected action
+      const actionDiv = document.getElementById(actionId);
+      
+      // If content doesn't exist, create it
+      if (actionDiv.innerHTML === '') {
+        if (section === 'records') {
+          loadRecordAction(actionId);
+        } else if (section === 'transactions') {
+          loadTransactionAction(actionId);
+        }
+      }
+      
+      actionDiv.style.display = 'block';
+    }
+    
+    function loadRecordAction(actionId) {
+      const actionDiv = document.getElementById(actionId);
+      
+      if (actionId === 'add-expense') {
+        actionDiv.innerHTML = `
+          <h3><i class="fas fa-plus"></i> Add New Expense</h3>
+          <form id="addExpenseForm">
+            <div class="form-group">
+              <label for="category"><i class="fas fa-tag"></i> Category:</label>
+              <select id="category" required>
+                <option value="">Select Category</option>
+                <option value="food">Food</option>
+                <option value="transport">Transport</option>
+                <option value="housing">Housing</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="amount"><i class="fas fa-money-bill-wave"></i> Amount:</label>
+              <input type="number" id="amount" min="0" step="1" required>
+            </div>
+            <div class="form-group">
+              <label for="expense-date"><i class="fas fa-calendar"></i> Date:</label>
+              <input type="date" id="expense-date" required>
+            </div>
+            <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Add Expense</button>
+          </form>
+        `;
+        
+        // Add form submission handler
+        document.getElementById('addExpenseForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const category = document.getElementById('category').value;
+          const amount = parseFloat(document.getElementById('amount').value);
+          const date = document.getElementById('expense-date').value;
+          
+          if(category && amount && date) {
+            // Generate new ID
+            const newId = currentUser.expenses.length > 0 ? 
+              String(parseInt(currentUser.expenses[currentUser.expenses.length-1].id) + 1) : '1001';
+            
+            // Add to expenses array
+            currentUser.expenses.push({
+              id: newId,
+              category: category,
+              amount: amount,
+              date: date
+            });
+            
+            alert(`Expense added!\nID: ${newId}\nCategory: ${category}\nAmount: ${amount}\nDate: ${date}`);
+            
+            // Save to localStorage
+            saveUserData();
+            
+            // Update charts
+            updateCharts();
+            
+            // Reset form
+            e.target.reset();
+          } else {
+            alert('Please fill all fields');
+          }
+        });
+      }
+      else if (actionId === 'view-expense') {
+        // Calculate totals
+        const foodTotal = currentUser.expenses
+          .filter(e => e.category === 'food')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        const transportTotal = currentUser.expenses
+          .filter(e => e.category === 'transport')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        const housingTotal = currentUser.expenses
+          .filter(e => e.category === 'housing')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        const entertainmentTotal = currentUser.expenses
+          .filter(e => e.category === 'entertainment')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        const otherTotal = currentUser.expenses
+          .filter(e => e.category === 'other')
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        const totalExpenses = foodTotal + transportTotal + housingTotal + entertainmentTotal + otherTotal;
+        const remainingIncome = currentUser.income - totalExpenses;
+        
+        actionDiv.innerHTML = `
+          <h3><i class="fas fa-eye"></i> View Expenses</h3>
+          <div style="margin: 15px 0; padding: 10px; background: #e8f5e9; border-radius: 5px;">
+            <strong><i class="fas fa-info-circle"></i> Your current income after expenses: ${remainingIncome.toLocaleString('en-PK')}</strong>
+          </div>
+          
+          ${foodTotal > 0 ? `
+            <h4><i class="fas fa-utensils"></i> Food</h4>
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.filter(e => e.category === 'food').map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin: 10px 0;">
+              <strong>Total in Food: ${foodTotal.toLocaleString('en-PK')}</strong>
+            </div>
+          ` : ''}
+          
+          ${transportTotal > 0 ? `
+            <h4><i class="fas fa-car"></i> Transport</h4>
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.filter(e => e.category === 'transport').map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin: 10px 0;">
+              <strong>Total in Transport: ${transportTotal.toLocaleString('en-PK')}</strong>
+            </div>
+          ` : ''}
+          
+          ${housingTotal > 0 ? `
+            <h4><i class="fas fa-home"></i> Housing</h4>
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.filter(e => e.category === 'housing').map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin: 10px 0;">
+              <strong>Total in Housing: ${housingTotal.toLocaleString('en-PK')}</strong>
+            </div>
+          ` : ''}
+          
+          ${entertainmentTotal > 0 ? `
+            <h4><i class="fas fa-gamepad"></i> Entertainment</h4>
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.filter(e => e.category === 'entertainment').map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin: 10px 0;">
+              <strong>Total in Entertainment: ${entertainmentTotal.toLocaleString('en-PK')}</strong>
+            </div>
+          ` : ''}
+          
+          ${otherTotal > 0 ? `
+            <h4><i class="fas fa-ellipsis-h"></i> Other</h4>
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.filter(e => e.category === 'other').map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin: 10px 0;">
+              <strong>Total in Other: ${otherTotal.toLocaleString('en-PK')}</strong>
+            </div>
+          ` : ''}
+          
+          ${currentUser.expenses.length === 0 ? `
+            <div style="margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 5px;">
+              <i class="fas fa-info-circle"></i> No expenses recorded yet.
+            </div>
+          ` : ''}
+        `;
+      }
+      else if (actionId === 'delete-expense') {
+        actionDiv.innerHTML = `
+          <h3><i class="fas fa-trash"></i> Delete Expense</h3>
+          ${currentUser.expenses.length > 0 ? `
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.category.charAt(0).toUpperCase() + expense.category.slice(1)}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            
+            <div class="input-with-button">
+              <input type="text" id="delete-expense-id" placeholder="Enter ID to delete">
+              <button class="submit-btn" onclick="findRecordToDelete()"><i class="fas fa-search"></i> Find</button>
+            </div>
+            
+            <div class="confirm-box" id="delete-confirm" style="display: none;">
+              <p>Are you sure you want to delete this expense?</p>
+              <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 4px;">
+                <strong>ID:</strong> <span id="confirm-delete-id"></span><br>
+                <strong>Amount:</strong> <span id="confirm-delete-amount"></span><br>
+                <strong>Category:</strong> <span id="confirm-delete-category"></span><br>
+                <strong>Date:</strong> <span id="confirm-delete-date"></span>
+              </div>
+              <button class="submit-btn" onclick="deleteRecord()" style="background-color: #ff4444;"><i class="fas fa-check"></i> Yes, Delete</button>
+              <button class="submit-btn" onclick="cancelDelete()" style="background-color: #666;"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+          ` : `
+            <div style="margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 5px;">
+              <i class="fas fa-info-circle"></i> No expenses recorded yet.
+            </div>
+          `}
+        `;
+      }
+      else if (actionId === 'edit-expense') {
+        actionDiv.innerHTML = `
+          <h3><i class="fas fa-edit"></i> Edit Expense</h3>
+          ${currentUser.expenses.length > 0 ? `
+            <table class="data-table">
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+              </tr>
+              ${currentUser.expenses.map(expense => `
+                <tr>
+                  <td>${expense.id}</td>
+                  <td>${expense.amount.toLocaleString('en-PK')}</td>
+                  <td>${expense.category.charAt(0).toUpperCase() + expense.category.slice(1)}</td>
+                  <td>${expense.date}</td>
+                </tr>
+              `).join('')}
+            </table>
+            
+            <div class="input-with-button">
+              <input type="text" id="edit-expense-id" placeholder="Enter ID to edit">
+              <button class="submit-btn" onclick="findRecordToEdit()"><i class="fas fa-search"></i> Find</button>
+            </div>
+            
+            <div id="edit-form" style="display: none; margin-top: 20px;">
+              <h4><i class="fas fa-edit"></i> Edit Expense <span id="editing-expense-id"></span></h4>
+              <div class="form-group">
+                <label><i class="fas fa-tag"></i> Category:</label>
+                <select id="edit-category">
+                  <option value="food">Food</option>
+                  <option value="transport">Transport</option>
+                  <option value="housing">Housing</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-money-bill-wave"></i> Amount:</label>
+                <input type="number" id="edit-amount" min="0" step="1">
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Date:</label>
+                <input type="date" id="edit-date">
+              </div>
+              <button class="submit-btn" onclick="saveEdit()"><i class="fas fa-save"></i> Save Changes</button>
+              <button class="submit-btn" onclick="cancelEdit()" style="background-color: #666;"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+          ` : `
+            <div style="margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 5px;">
+              <i class="fas fa-info-circle"></i> No expenses recorded yet.
+            </div>
+          `}
+        `;
+      }
+    }
+    
+    function loadTransactionAction(actionId) {
+      const actionDiv = document.getElementById(actionId);
+      
+      if (actionId === 'add-transaction') {
+        actionDiv.innerHTML = `
+          <h3><i class="fas fa-plus"></i> Add New Transaction</h3>
+          <form id="addTransactionForm">
+            <div class="form-group">
+              <label for="transaction-type"><i class="fas fa-exchange-alt"></i> Transaction Type:</label>
+              <select id="transaction-type" required>
+                <option value="">Select Type</option>
+                <option value="sent">Sent</option>
+                <option value="received">Received</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="transaction-amount"><i class="fas fa-money-bill-wave"></i> Amount:</label>
+              <input type="number" id="transaction-amount" min="0" step="1" required>
+            </div>
+            <div class="form-group">
+              <label for="transaction-date"><i class="fas fa-calendar"></i> Date:</label>
+              <input type="date" id="transaction-date" required>
+            </div>
+            <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Add Transaction</button>
+          </form>
+        `;
+        
+        // Add form submission handler
+        document.getElementById('addTransactionForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const type = document.getElementById('transaction-type').value;
+          const amount = parseFloat(document.getElementById('transaction-amount').value);
+          const date = document.getElementById('transaction-date').value;
+          
+          if(type && amount && date) {
+            // Generate new ID
+            const newId = currentUser.transactions.length > 0 ? 
+              String(parseInt(currentUser.transactions[currentUser.transactions.length-1].id) + 1) : '1001';
+            
+            // Add to transactions array
+            currentUser.transactions.push({
+              id: newId,
+              type: type,
+              amount: amount,
+              date: date
+            });
+            
+            alert(`Transaction added!\nID: ${newId}\nType: ${type}\nAmount: ${amount}\nDate: ${date}`);
+            
+            // Save to localStorage
+            saveUserData();
+            
+            // Update transactions table
+            updateTransactionsTable();
+            
+            // Update charts
+            updateCharts();
+            
+            // Reset form
+            e.target.reset();
+          } else {
+            alert('Please fill all fields');
+          }
+        });
+      }
+      else if (actionId === 'view-transactions') {
+        updateTransactionsTable();
+      }
+    }
+    
+    function updateTransactionsTable() {
+      const actionDiv = document.getElementById('view-transactions');
+      if (!actionDiv) return;
+      
+      actionDiv.innerHTML = `
+        <h3><i class="fas fa-eye"></i> View Transactions</h3>
+        ${currentUser.transactions.length > 0 ? `
+          <table class="data-table">
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+            ${currentUser.transactions.map(transaction => `
+              <tr>
+                <td>${transaction.id}</td>
+                <td class="${transaction.type}"><i class="fas fa-arrow-${transaction.type === 'sent' ? 'up' : 'down'}"></i> ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</td>
+                <td>${transaction.amount.toLocaleString('en-PK')}</td>
+                <td>${transaction.date}</td>
+              </tr>
+            `).join('')}
+          </table>
+        ` : `
+          <div style="margin: 20px 0; padding: 15px; background: #fff3e0; border-radius: 5px;">
+            <i class="fas fa-info-circle"></i> No transactions recorded yet.
+          </div>
+        `}
+      `;
+    }
+
+    function updateCharts() {
+      updatePieChart();
+      updateBarChart();
+    }
+
+    function updatePieChart() {
+      const pieChart = document.getElementById('pie-chart');
+      const pieLegend = document.getElementById('pie-legend');
+      
+      if (!pieChart || !pieLegend) return;
+      
+      // Calculate category totals
+      const categories = ['food', 'transport', 'housing', 'entertainment', 'other'];
+      const categoryTotals = {};
+      let totalExpenses = 0;
+      
+      categories.forEach(category => {
+        const total = currentUser.expenses
+          .filter(e => e.category === category)
+          .reduce((sum, e) => sum + e.amount, 0);
+          
+        categoryTotals[category] = total;
+        totalExpenses += total;
+      });
+      
+      // Generate pie chart gradient
+      if (totalExpenses > 0) {
+        let gradientParts = [];
+        let accumulatedPercent = 0;
+        
+        categories.forEach((category, index) => {
+          if (categoryTotals[category] > 0) {
+            const percent = (categoryTotals[category] / totalExpenses) * 100;
+            const startPercent = accumulatedPercent;
+            accumulatedPercent += percent;
+            
+            gradientParts.push(`${categoryColors[category]} ${startPercent}% ${accumulatedPercent}%`);
+          }
+        });
+        
+        pieChart.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+      } else {
+        pieChart.style.background = '#f5f5f5';
+      }
+      
+      // Update legend
+      pieLegend.innerHTML = categories.map(category => {
+        if (categoryTotals[category] > 0) {
+          const percent = ((categoryTotals[category] / totalExpenses) * 100).toFixed(1);
+          return `
+            <div class="legend-item">
+              <div class="legend-label">
+                <div class="legend-color" style="background: ${categoryColors[category]};"></div>
+                <span>${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+              </div>
+              <div class="legend-value">${percent}%</div>
+            </div>
+          `;
+        }
+        return '';
+      }).join('');
+    }
+
+    function updateBarChart() {
+      const yAxis = document.getElementById('y-axis');
+      const barChart = document.getElementById('bar-chart');
+      
+      if (!yAxis || !barChart) return;
+      
+      // Calculate transaction totals
+      const receivedTotal = currentUser.transactions
+        .filter(t => t.type === 'received')
+        .reduce((sum, t) => sum + t.amount, 0);
+        
+      const sentTotal = currentUser.transactions
+        .filter(t => t.type === 'sent')
+        .reduce((sum, t) => sum + t.amount, 0);
+        
+      const maxAmount = Math.max(receivedTotal, sentTotal, 1000);
+      const scaleFactor = 200 / maxAmount;
+      
+      // Clear previous content
+      yAxis.innerHTML = '';
+      barChart.innerHTML = '';
+      
+      // Create Y-axis labels with proper formatting
+      const steps = 5;
+      for (let i = steps; i >= 0; i--) {
+        const value = Math.round((maxAmount / steps) * i);
+        const yAxisLabel = document.createElement('div');
+        yAxisLabel.textContent = value.toLocaleString('en-PK');
+        yAxis.appendChild(yAxisLabel);
+      }
+      
+      // Create bars with proper spacing
+      if (receivedTotal > 0) {
+        const receivedHeight = receivedTotal * scaleFactor;
+        const receivedWrapper = document.createElement('div');
+        receivedWrapper.className = 'bar-wrapper';
+        receivedWrapper.innerHTML = `
+          <div class="bar received-bar" style="height: ${receivedHeight}px;"></div>
+          <div class="chart-label">Received</div>
+        `;
+        barChart.appendChild(receivedWrapper);
+      }
+      
+      if (sentTotal > 0) {
+        const sentHeight = sentTotal * scaleFactor;
+        const sentWrapper = document.createElement('div');
+        sentWrapper.className = 'bar-wrapper';
+        sentWrapper.innerHTML = `
+          <div class="bar sent-bar" style="height: ${sentHeight}px;"></div>
+          <div class="chart-label">Sent</div>
+        `;
+        barChart.appendChild(sentWrapper);
+      }
+      
+      // Add zero line
+      const zeroLine = document.createElement('div');
+      zeroLine.className = 'zero-line';
+      barChart.appendChild(zeroLine);
+    }
+
+    let currentRecord = null;
+
+    function findRecordToDelete() {
+      const recordId = document.getElementById('delete-expense-id').value;
+      if (!recordId) {
+        alert('Please enter an expense ID');
+        return;
+      }
+      
+      const record = currentUser.expenses.find(e => e.id === recordId);
+      if (record) {
+        currentRecord = record;
+        document.getElementById('confirm-delete-id').textContent = record.id;
+        document.getElementById('confirm-delete-amount').textContent = record.amount.toLocaleString('en-PK');
+        document.getElementById('confirm-delete-category').textContent = record.category.charAt(0).toUpperCase() + record.category.slice(1);
+        document.getElementById('confirm-delete-date').textContent = record.date;
+        document.getElementById('delete-confirm').style.display = 'block';
+        document.getElementById('delete-confirm').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Expense not found!');
+      }
+    }
+
+    function deleteRecord() {
+      if (currentRecord) {
+        // Remove from expenses array
+        currentUser.expenses = currentUser.expenses.filter(e => e.id !== currentRecord.id);
+        
+        // Save to localStorage
+        saveUserData();
+        
+        // Update charts
+        updateCharts();
+        
+        alert(`Expense ${currentRecord.id} deleted successfully!`);
+        document.getElementById('delete-confirm').style.display = 'none';
+        document.getElementById('delete-expense-id').value = '';
+        currentRecord = null;
+        
+        // Reload the view
+        showAction('records', 'delete-expense');
+      }
+    }
+
+    function cancelDelete() {
+      document.getElementById('delete-confirm').style.display = 'none';
+      currentRecord = null;
+    }
+
+    function findRecordToEdit() {
+      const recordId = document.getElementById('edit-expense-id').value;
+      if (!recordId) {
+        alert('Please enter an expense ID');
+        return;
+      }
+      
+      const record = currentUser.expenses.find(e => e.id === recordId);
+      if (record) {
+        currentRecord = record;
+        document.getElementById('editing-expense-id').textContent = record.id;
+        document.getElementById('edit-category').value = record.category;
+        document.getElementById('edit-amount').value = record.amount;
+        document.getElementById('edit-date').value = record.date;
+        document.getElementById('edit-form').style.display = 'block';
+        document.getElementById('edit-form').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Expense not found!');
+      }
+    }
+
+    function saveEdit() {
+      if (currentRecord) {
+        // Update the record
+        const recordIndex = currentUser.expenses.findIndex(e => e.id === currentRecord.id);
+        if (recordIndex !== -1) {
+          currentUser.expenses[recordIndex] = {
+            id: currentRecord.id,
+            category: document.getElementById('edit-category').value,
+            amount: parseFloat(document.getElementById('edit-amount').value),
+            date: document.getElementById('edit-date').value
+          };
+          
+          // Save to localStorage
+          saveUserData();
+          
+          // Update charts
+          updateCharts();
+          
+          alert(`Expense ${currentRecord.id} updated successfully!`);
+          cancelEdit();
+          
+          // Reload the view
+          showAction('records', 'edit-expense');
+        }
+      }
+    }
+
+    function cancelEdit() {
+      document.getElementById('edit-form').style.display = 'none';
+      document.getElementById('edit-expense-id').value = '';
+      currentRecord = null;
+    }
+
+    function openModal(type) {
+      document.getElementById(`modal-${type}`).style.display = 'block';
+    }
+
+    function closeModal(type) {
+      document.getElementById(`modal-${type}`).style.display = 'none';
+    }
+
+    function updateUserID() {
+      const newID = document.getElementById('new-userid').value;
+      if(newID) {
+        // Update user data
+        currentUser.id = newID;
+        
+        // Update UI
+        document.getElementById('username-display').textContent = newID;
+        document.getElementById('user-id').textContent = newID;
+        document.getElementById('current-userid').value = newID;
+        
+        // Save to localStorage
+        saveUserData();
+        
+        alert(`User ID updated to ${newID}`);
+        closeModal('userid');
+      } else {
+        alert('Please enter a new User ID');
+      }
+    }
+    
+    function updateEmail() {
+      const newEmail = document.getElementById('new-email').value;
+      if(newEmail) {
+        // Update user data
+        currentUser.email = newEmail;
+        
+        // Update UI
+        document.getElementById('user-email').textContent = newEmail;
+        document.getElementById('current-email').value = newEmail;
+        
+        // Save to localStorage
+        saveUserData();
+        
+        alert(`Email updated to ${newEmail}`);
+        closeModal('email');
+      } else {
+        alert('Please enter a new Email');
+      }
+    }
+    
+    function updatePassword() {
+      const newPass = document.getElementById('new-password').value;
+      const confirmPass = document.getElementById('confirm-password').value;
+      
+      if(!newPass || !confirmPass) {
+        alert('Please fill both password fields');
+      } else if(newPass !== confirmPass) {
+        alert('Passwords do not match!');
+      } else {
+        // Update user data
+        currentUser.password = newPass;
+        
+        // Save to localStorage
+        saveUserData();
+        
+        alert('Password updated successfully!');
+        closeModal('password');
+      }
+    }
+    
+    function updateIncome() {
+      const newIncome = parseFloat(document.getElementById('new-income').value);
+      if(!isNaN(newIncome)) {
+        // Update user data
+        currentUser.income = newIncome;
+        
+        // Update UI
+        document.getElementById('user-income').textContent = newIncome.toLocaleString('en-PK');
+        document.getElementById('current-income').value = newIncome.toLocaleString('en-PK');
+        
+        // Save to localStorage
+        saveUserData();
+        
+        alert(`Income updated to ${newIncome.toLocaleString('en-PK')}`);
+        closeModal('income');
+      } else {
+        alert('Please enter a valid Income amount');
+      }
+    }
+    
+    // Predict savings function
+    
+function calculateSavings() {
+    const income = currentUser.income;
+  const food = parseFloat(document.getElementById('food-expense').value) || 0;
+  const transport = parseFloat(document.getElementById('transport-expense').value) || 0;
+  const entertainment = parseFloat(document.getElementById('entertainment-expense').value) || 0;
+  const housing = parseFloat(document.getElementById('housing-expense').value) || 0;
+  const other = parseFloat(document.getElementById('other-expense').value) || 0;
+
+  const totalExpenses = food + transport + entertainment + housing + other;
+  const savings = income - totalExpenses;
+
+  const resultBox = document.querySelector('.result-box');
+  resultBox.style.display = 'block';
+  document.getElementById('estimated-savings').textContent = savings.toLocaleString('en-PK');
+}
+
+    
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    }
+    
+    function setupFormListeners() {
+      // Add transaction form listener
+      const addTransactionForm = document.getElementById('addTransactionForm');
+      if (addTransactionForm) {
+        addTransactionForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const type = document.getElementById('transaction-type').value;
+          const amount = parseFloat(document.getElementById('transaction-amount').value);
+          const date = document.getElementById('transaction-date').value;
+          
+          if(type && amount && date) {
+            // Generate new ID
+            const newId = currentUser.transactions.length > 0 ? 
+              String(parseInt(currentUser.transactions[currentUser.transactions.length-1].id) + 1) : '1001';
+            
+            // Add to transactions array
+            currentUser.transactions.push({
+              id: newId,
+              type: type,
+              amount: amount,
+              date: date
+            });
+            
+            alert(`Transaction added!\nID: ${newId}\nType: ${type}\nAmount: ${amount}\nDate: ${date}`);
+            
+            // Save to localStorage
+            saveUserData();
+            
+            // Update transactions table
+            updateTransactionsTable();
+            
+            // Update charts
+            updateCharts();
+            
+            // Reset form
+            e.target.reset();
+          } else {
+            alert('Please fill all fields');
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

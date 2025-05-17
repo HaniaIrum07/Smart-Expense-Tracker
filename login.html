@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login & Register | Smart Expense Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background-color: #0D3B66;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: white;
+      width: 400px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .form-container {
+      padding: 30px;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #0D3B66;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #0D3B66;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background-color: #0D3B66;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .switch {
+      text-align: center;
+      margin-top: 15px;
+      color: #0D3B66;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #register-form {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Login Form -->
+    <div class="form-container" id="login-form">
+      <div class="title">Smart Expense Tracker</div>
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input type="text" placeholder="User ID" id="login-userid" required />
+        <input type="password" placeholder="Password" id="login-password" required />
+        <div id="loginError" class="error"></div>
+        <div id="loginSuccess" class="success"></div>
+        <button type="submit">Login</button>
+      </form>
+      <div class="switch" onclick="toggleForms()">Don't have an account? Register</div>
+    </div>
+
+    <!-- Register Form -->
+    <div class="form-container" id="register-form">
+      <div class="title">Smart Expense Tracker</div>
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input type="text" placeholder="User ID (alphanumeric)" id="register-userid" required pattern="[a-zA-Z0-9]+" title="Only letters and numbers allowed" />
+        <input type="email" placeholder="Email" id="register-email" required />
+        <input type="password" placeholder="Password (8 characters)" id="register-password" required minlength="8" maxlength="8" />
+        <input type="password" placeholder="Confirm Password" id="register-confirm-password" required minlength="8" maxlength="8" />
+        <input type="number" step="0.01" placeholder="Monthly Income" id="register-income" required min="0.01" />
+        <div id="registerError" class="error"></div>
+        <button type="submit">Register</button>
+      </form>
+      <div class="switch" onclick="toggleForms()">Already have an account? Login</div>
+    </div>
+  </div>
+
+  <script>
+    function toggleForms() {
+      const login = document.getElementById("login-form");
+      const register = document.getElementById("register-form");
+      if (login.style.display === "none") {
+        login.style.display = "block";
+        register.style.display = "none";
+      } else {
+        login.style.display = "none";
+        register.style.display = "block";
+      }
+      document.getElementById("loginError").textContent = "";
+      document.getElementById("registerError").textContent = "";
+    }
+
+    // Login form handling
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const userid = document.getElementById("login-userid").value;
+      const password = document.getElementById("login-password").value;
+      const errorDiv = document.getElementById("loginError");
+      
+      errorDiv.textContent = "";
+      
+      if (!userid || !password) {
+        errorDiv.textContent = "Please fill in all fields";
+        return;
+      }
+
+      // Check if user exists in localStorage
+      const users = JSON.parse(localStorage.getItem('expenseTrackerUsers')) || [];
+      const user = users.find(u => u.id === userid && u.password === password);
+      
+      if (user) {
+        // Create user data object for dashboard
+        const userData = {
+          id: user.id,
+          email: user.email,
+          password: user.password,
+          income: user.income,
+          expenses: user.expenses || [],
+          transactions: user.transactions || []
+        };
+        
+        // Redirect to dashboard with user data
+        window.location.href = `dashboard.html?user=${encodeURIComponent(JSON.stringify(userData))}`;
+      } else {
+        errorDiv.textContent = "Invalid credentials";
+      }
+    });
+
+    // Registration form handling
+    document.getElementById("registerForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const userid = document.getElementById("register-userid").value;
+      const email = document.getElementById("register-email").value;
+      const password = document.getElementById("register-password").value;
+      const confirmPassword = document.getElementById("register-confirm-password").value;
+      const income = parseFloat(document.getElementById("register-income").value);
+      const errorDiv = document.getElementById("registerError");
+      
+      errorDiv.textContent = "";
+      
+      // Client-side validation
+      if (!userid || !email || !password || !confirmPassword || !income) {
+        errorDiv.textContent = "All fields are required";
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        errorDiv.textContent = "Passwords do not match";
+        return;
+      }
+
+      if (password.length !== 8) {
+        errorDiv.textContent = "Password must be exactly 8 characters";
+        return;
+      }
+
+      // Check if user already exists
+      const users = JSON.parse(localStorage.getItem('expenseTrackerUsers')) || [];
+      if (users.some(u => u.id === userid)) {
+        errorDiv.textContent = "User ID already exists";
+        return;
+      }
+
+      // Create new user
+      const newUser = {
+        id: userid,
+        email: email,
+        password: password,
+        income: income,
+        expenses: [],
+        transactions: []
+      };
+
+      // Save to users array
+      users.push(newUser);
+      localStorage.setItem('expenseTrackerUsers', JSON.stringify(users));
+
+      // Show success message and switch to login
+      toggleForms();
+      document.getElementById("loginSuccess").textContent = "Registration successful! Please login.";
+      setTimeout(() => {
+        document.getElementById("loginSuccess").textContent = "";
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
